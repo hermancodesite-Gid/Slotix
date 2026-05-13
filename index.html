@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+/>
+
+<title>Slotix Test Build</title>
+
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<style>
+
+/*********************************************************
+ *
+ * RESET
+ *
+ *********************************************************/
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+html,
+body{
+  width:100%;
+  height:100%;
+  overflow:hidden;
+
+  background:#07090d;
+
+  font-family:Arial, sans-serif;
+
+  color:white;
+}
+
+/*********************************************************
+ *
+ * APP
+ *
+ *********************************************************/
+
+#app{
+  width:100%;
+  height:100%;
+
+  display:flex;
+  flex-direction:column;
+}
+
+/*********************************************************
+ *
+ * HEADER
+ *
+ *********************************************************/
+
+.header{
+
+  width:100%;
+  height:72px;
+
+  padding:12px;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  border-bottom:1px solid rgba(255,255,255,.05);
+
+  background:#0d1117;
+}
+
+.profile{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.avatar{
+  width:48px;
+  height:48px;
+
+  border-radius:50%;
+
+  background:#1d2733;
+
+  overflow:hidden;
+}
+
+.avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.user-data{
+  display:flex;
+  flex-direction:column;
+}
+
+.username{
+  font-size:14px;
+  font-weight:700;
+}
+
+.balance{
+  font-size:13px;
+  color:#59ff9c;
+}
+
+.cashier-btn{
+
+  border:none;
+
+  background:linear-gradient(
+    135deg,
+    #00ff88,
+    #00ccff
+  );
+
+  color:black;
+
+  padding:10px 16px;
+
+  border-radius:12px;
+
+  font-weight:700;
+
+  cursor:pointer;
+}
+
+/*********************************************************
+ *
+ * NAVIGATION
+ *
+ *********************************************************/
+
+.tabs{
+
+  width:100%;
+  height:60px;
+
+  display:flex;
+
+  overflow-x:auto;
+
+  border-bottom:1px solid rgba(255,255,255,.05);
+
+  background:#11161d;
+}
+
+.tab{
+
+  min-width:120px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  font-size:13px;
+
+  color:#aaa;
+
+  cursor:pointer;
+}
+
+.tab.active{
+  color:white;
+  border-bottom:2px solid #00ff88;
+}
+
+/*********************************************************
+ *
+ * MAIN
+ *
+ *********************************************************/
+
+.main{
+  flex:1;
+
+  overflow:auto;
+
+  padding:16px;
+}
+
+/*********************************************************
+ *
+ * GAME CARD
+ *
+ *********************************************************/
+
+.game-card{
+
+  width:100%;
+
+  background:#121821;
+
+  border-radius:18px;
+
+  padding:18px;
+
+  border:1px solid rgba(255,255,255,.04);
+
+  box-shadow:
+    0 0 20px rgba(0,0,0,.4);
+}
+
+/*********************************************************
+ *
+ * CRASH
+ *
+ *********************************************************/
+
+.crash-container{
+
+  width:100%;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+
+.multiplier{
+
+  font-size:64px;
+
+  font-weight:900;
+
+  margin-top:40px;
+
+  color:#00ff88;
+
+  transition:.05s linear;
+}
+
+.status{
+  margin-top:8px;
+  color:#999;
+}
+
+.controls{
+
+  width:100%;
+
+  margin-top:40px;
+
+  display:flex;
+  gap:12px;
+}
+
+.bet-input{
+
+  flex:1;
+
+  height:52px;
+
+  background:#0d1117;
+
+  border:none;
+
+  border-radius:14px;
+
+  color:white;
+
+  padding:0 16px;
+
+  font-size:16px;
+}
+
+.action-btn{
+
+  height:52px;
+
+  padding:0 22px;
+
+  border:none;
+
+  border-radius:14px;
+
+  font-weight:700;
+
+  cursor:pointer;
+
+  color:black;
+
+  background:#00ff88;
+}
+
+/*********************************************************
+ *
+ * ADMIN
+ *
+ *********************************************************/
+
+.admin-panel{
+
+  margin-top:20px;
+
+  background:#121821;
+
+  border-radius:18px;
+
+  padding:18px;
+}
+
+.admin-title{
+  font-size:18px;
+  font-weight:700;
+  margin-bottom:18px;
+}
+
+.metric-grid{
+
+  display:grid;
+
+  grid-template-columns:1fr 1fr;
+
+  gap:12px;
+}
+
+.metric{
+
+  background:#0d1117;
+
+  padding:16px;
+
+  border-radius:14px;
+}
+
+.metric-value{
+  font-size:22px;
+  font-weight:800;
+  margin-top:8px;
+}
+
+.slider-wrap{
+  margin-top:20px;
+}
+
+.slider{
+  width:100%;
+}
+
+.users{
+
+  margin-top:20px;
+
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.user{
+
+  background:#0d1117;
+
+  border-radius:14px;
+
+  padding:14px;
+}
+
+.log{
+  margin-top:8px;
+  font-size:12px;
+  color:#888;
+}
+
+canvas{
+  width:100%;
+  height:240px;
+
+  margin-top:20px;
+
+  background:#0d1117;
+
+  border-radius:14px;
+}
+
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- HEADER -->
+
+  <div class="header">
+
+    <div class="profile">
+
+      <div class="avatar">
+        <img id="avatar">
+      </div>
+
+      <div class="user-data">
+        <div class="username" id="username">
+          Loading...
+        </div>
+
+        <div class="balance" id="balance">
+          0.00 CR
+        </div>
+      </div>
+
+    </div>
+
+    <button class="cashier-btn">
+      Cashier
+    </button>
+
+  </div>
+
+  <!-- NAV -->
+
+  <div class="tabs">
+
+    <div class="tab active">
+      Crash
+    </div>
+
+    <div class="tab">
+      Slots
+    </div>
+
+    <div class="tab">
+      Cards
+    </div>
+
+    <div class="tab">
+      Lottery
+    </div>
+
+    <div class="tab">
+      Admin
+    </div>
+
+  </div>
+
+  <!-- MAIN -->
+
+  <div class="main">
+
+    <!-- CRASH GAME -->
+
+    <div class="game-card">
+
+      <div class="crash-container">
+
+        <canvas id="graph"></canvas>
+
+        <div
+          class="multiplier"
+          id="multiplier"
+        >
+          1.00x
+        </div>
+
+        <div
+          class="status"
+          id="status"
+        >
+          Waiting...
+        </div>
+
+        <div class="controls">
+
+          <input
+            class="bet-input"
+            id="betInput"
+            type="number"
+            value="10"
+          />
+
+          <button
+            class="action-btn"
+            id="startBtn"
+          >
+            START
+          </button>
+
+          <button
+            class="action-btn"
+            id="cashoutBtn"
+          >
+            CASHOUT
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ADMIN -->
+
+    <div class="admin-panel">
+
+      <div class="admin-title">
+        Admin Dashboard
+      </div>
+
+      <div class="metric-grid">
+
+        <div class="metric">
+          Traffic
+          <div
+            class="metric-value"
+            id="traffic"
+          >
+            0
+          </div>
+        </div>
+
+        <div class="metric">
+          Profit
+          <div
+            class="metric-value"
+            id="profit"
+          >
+            0
+          </div>
+        </div>
+
+      </div>
+
+      <div class="slider-wrap">
+
+        RTP:
+        <span id="rtpValue">
+          50%
+        </span>
+
+        <input
+          type="range"
+          min="0"
+          max="100"
+          value="50"
+          class="slider"
+          id="rtpSlider"
+        />
+
+      </div>
+
+      <div
+        class="users"
+        id="users"
+      ></div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+/*********************************************************
+ *
+ * TELEGRAM WEBAPP
+ *
+ *********************************************************/
+
+const tg = window.Telegram.WebApp;
+
+tg.expand();
+
+/*********************************************************
+ *
+ * USER
+ *
+ *********************************************************/
+
+const user =
+  tg.initDataUnsafe.user || {
+
+    id: 1,
+    username: "test_user",
+    first_name: "Slotix"
+  };
+
+/*********************************************************
+ *
+ * UI
+ *
+ *********************************************************/
+
+document.getElementById(
+  "username"
+).innerText =
+  "@" + user.username;
+
+document.getElementById(
+  "avatar"
+).src =
+  user.photo_url ||
+  "https://placehold.co/100";
+
+/*********************************************************
+ *
+ * LOCAL TEST BALANCE
+ *
+ *********************************************************/
+
+let balance = 1000;
+
+function updateBalance(){
+
+  document.getElementById(
+    "balance"
+  ).innerText =
+    balance.toFixed(2) + " CR";
+}
+
+updateBalance();
+
+/*********************************************************
+ *
+ * CRASH ENGINE
+ *
+ *********************************************************/
+
+let multiplier = 1.00;
+
+let running = false;
+
+let crashed = false;
+
+let interval = null;
+
+/*********************************************************
+ *
+ * RTP
+ *
+ *********************************************************/
+
+let RTP = 50;
+
+/*********************************************************
+ *
+ * GRAPH
+ *
+ *********************************************************/
+
+const canvas =
+  document.getElementById("graph");
+
+const ctx =
+  canvas.getContext("2d");
+
+canvas.width = 800;
+canvas.height = 240;
+
+let graphPoints = [];
+
+/*********************************************************
+ *
+ * DRAW GRAPH
+ *
+ *********************************************************/
+
+function drawGraph(){
+
+  ctx.clearRect(
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
+
+  ctx.beginPath();
+
+  ctx.lineWidth = 4;
+
+  ctx.strokeStyle = "#00ff88";
+
+  graphPoints.forEach((p, i) => {
+
+    if(i === 0){
+
+      ctx.moveTo(p.x, p.y);
+
+    } else {
+
+      ctx.lineTo(p.x, p.y);
+    }
+  });
+
+  ctx.stroke();
+}
+
+/*********************************************************
+ *
+ * START GAME
+ *
+ *********************************************************/
+
+document.getElementById(
+  "startBtn"
+).onclick = () => {
+
+  if(running) return;
+
+  const bet =
+    Number(
+      document.getElementById(
+        "betInput"
+      ).value
+    );
+
+  if(balance < bet){
+
+    alert("Not enough balance");
+
+    return;
+  }
+
+  balance -= bet;
+
+  updateBalance();
+
+  multiplier = 1;
+
+  crashed = false;
+
+  running = true;
+
+  graphPoints = [];
+
+  document.getElementById(
+    "status"
+  ).innerText =
+    "Flying...";
+
+  /*******************************************************
+   *
+   * RTP LOGIC
+   *
+   *******************************************************/
+
+  const crashPoint =
+    1 +
+    Math.random() *
+    (RTP / 6);
+
+  /*******************************************************
+   *
+   * LOOP
+   *
+   *******************************************************/
+
+  interval = setInterval(() => {
+
+    multiplier += 0.01;
+
+    document.getElementById(
+      "multiplier"
+    ).innerText =
+      multiplier.toFixed(2) + "x";
+
+    /*****************************************************
+     *
+     * GRAPH
+     *
+     *****************************************************/
+
+    graphPoints.push({
+
+      x:
+        graphPoints.length * 6,
+
+      y:
+        220 -
+        multiplier * 25
+    });
+
+    drawGraph();
+
+    /*****************************************************
+     *
+     * CRASH
+     *
+     *****************************************************/
+
+    if(multiplier >= crashPoint){
+
+      crashed = true;
+
+      running = false;
+
+      clearInterval(interval);
+
+      document.getElementById(
+        "status"
+      ).innerText =
+        "CRASHED AT " +
+        multiplier.toFixed(2) +
+        "x";
+    }
+
+  }, 50);
+};
+
+/*********************************************************
+ *
+ * CASHOUT
+ *
+ *********************************************************/
+
+document.getElementById(
+  "cashoutBtn"
+).onclick = () => {
+
+  if(!running) return;
+
+  running = false;
+
+  clearInterval(interval);
+
+  const bet =
+    Number(
+      document.getElementById(
+        "betInput"
+      ).value
+    );
+
+  const payout =
+    bet * multiplier;
+
+  balance += payout;
+
+  updateBalance();
+
+  document.getElementById(
+    "status"
+  ).innerText =
+    "CASHOUT " +
+    payout.toFixed(2);
+
+};
+
+/*********************************************************
+ *
+ * ADMIN RTP
+ *
+ *********************************************************/
+
+const slider =
+  document.getElementById(
+    "rtpSlider"
+  );
+
+slider.oninput = () => {
+
+  RTP = Number(slider.value);
+
+  document.getElementById(
+    "rtpValue"
+  ).innerText =
+    RTP + "%";
+};
+
+/*********************************************************
+ *
+ * ADMIN STATS
+ *
+ *********************************************************/
+
+document.getElementById(
+  "traffic"
+).innerText = "1254";
+
+document.getElementById(
+  "profit"
+).innerText = "$12,580";
+
+/*********************************************************
+ *
+ * USERS
+ *
+ *********************************************************/
+
+const usersContainer =
+  document.getElementById(
+    "users"
+  );
+
+const demoUsers = [
+
+  {
+    username:"player1",
+    balance:1200
+  },
+
+  {
+    username:"player2",
+    balance:500
+  },
+
+  {
+    username:"player3",
+    balance:8200
+  }
+];
+
+demoUsers.forEach(user => {
+
+  const div =
+    document.createElement("div");
+
+  div.className = "user";
+
+  div.innerHTML = `
+
+    <div>
+      @${user.username}
+    </div>
+
+    <div>
+      Balance:
+      ${user.balance}
+    </div>
+
+    <div class="log">
+      Last action:
+      Crash Bet
+    </div>
+  `;
+
+  usersContainer.appendChild(div);
+});
+
+</script>
+</body>
+</html>
